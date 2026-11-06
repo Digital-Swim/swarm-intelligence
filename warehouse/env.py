@@ -9,6 +9,12 @@
 
 import numpy as np
 
+from warehouse.config import (
+    VELOCITY_INERTIA,
+    VELOCITY_RANDOM_EXPLORATION,
+    VELOCITY_TOWARDS_BEST_POSITION,
+)
+
 
 class WarehouseEnv:
     def __init__(self, num_of_swarm_agents, store_positions, house_positions, world_size):
@@ -81,25 +87,21 @@ class WarehouseEnv:
         # Moving towards best position based on score
         # Random exploration to avoid local minima and explore new positions
 
-        velocity_inertia = .7
-        velocity_towards_best_position = 3
-        velocity_random_exploration = 2
-        
         # calculate net velocity for each agent
         for i in range(self.num_of_swarm_agents):
             # Inertia component
-            inertia_component = velocity_inertia * self.agent_velocities[i]
+            inertia_component = VELOCITY_INERTIA * self.agent_velocities[i]
 
             # Best position component
             best_position = self.find_best_position()
             direction_to_best = best_position - self.swarm_agent_positions[i]
             direction_to_best /= (np.linalg.norm(direction_to_best) + 1e-8)  # Normalize
-            best_position_component = velocity_towards_best_position * direction_to_best
+            best_position_component = VELOCITY_TOWARDS_BEST_POSITION * direction_to_best
 
             # Random exploration component
             random_direction = np.random.rand(2) * 2 - 1  # Random direction in range [-1, 1]
             random_direction /= (np.linalg.norm(random_direction) + 1e-8)  # Normalize
-            random_exploration_component = velocity_random_exploration * random_direction
+            random_exploration_component = VELOCITY_RANDOM_EXPLORATION * random_direction
 
             # Update velocity and position
             self.agent_velocities[i] = inertia_component + best_position_component + random_exploration_component
@@ -109,4 +111,3 @@ class WarehouseEnv:
             new_position = np.clip(new_position, 0, self.world_size)
 
             self.swarm_agent_positions[i] = new_position
-

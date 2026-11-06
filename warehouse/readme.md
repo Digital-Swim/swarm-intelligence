@@ -31,6 +31,11 @@ This reward function is designed to favor positions that are relatively far from
 
 The environment is defined in `warehouse/env.py`.
 
+Simulation defaults are centralized in `warehouse/config.py`. Change `NUM_STORES`,
+`NUM_HOUSES`, and `NUM_SWARM_AGENTS` to adjust the scenario size. The same file
+contains `WORLD_SIZE`, `POSITION_RANGE` for generated store and house coordinates,
+and the three velocity coefficients used by the swarm.
+
 Key components:
 - `WarehouseEnv.__init__`: initializes the swarm, velocities, and score array
 - `initialize()`: places agents randomly inside the world and computes initial scores
@@ -45,16 +50,16 @@ Each agent updates its velocity using a weighted combination of three terms:
 
 1. Inertia
    - keeps the agent moving in its previous direction
-   - `0.7 * previous_velocity`
+   - `VELOCITY_INERTIA * previous_velocity` (configured value: `1`)
 
 2. Attraction to global best
    - moves toward the best-scoring position found so far
    - normalized direction to the best agent
-   - `3 * direction_to_best`
+   - `VELOCITY_TOWARDS_BEST_POSITION * direction_to_best` (configured value: `3`)
 
 3. Random exploration
    - injects a new random direction to escape local minima
-   - `2 * random_direction`
+   - `VELOCITY_RANDOM_EXPLORATION * random_direction` (configured value: `5`)
 
 The new position is then computed as:
 
@@ -92,17 +97,24 @@ python warehouse/main.py
 
 ```python
 import numpy as np
+from warehouse.config import (
+    NUM_HOUSES,
+    NUM_STORES,
+    NUM_SWARM_AGENTS,
+    POSITION_RANGE,
+    WORLD_SIZE,
+)
 from warehouse.env import WarehouseEnv
 from warehouse.visual import WarehouseVisualizer
 
-store_positions = np.random.rand(5, 2) * 100
-house_positions = np.random.rand(10, 2) * 100
+store_positions = np.random.rand(NUM_STORES, 2) * POSITION_RANGE
+house_positions = np.random.rand(NUM_HOUSES, 2) * POSITION_RANGE
 
 env = WarehouseEnv(
-    num_of_swarm_agents=99,
+    num_of_swarm_agents=NUM_SWARM_AGENTS,
     store_positions=store_positions,
     house_positions=house_positions,
-    world_size=150,
+    world_size=WORLD_SIZE,
 )
 
 visualizer = WarehouseVisualizer(env)
