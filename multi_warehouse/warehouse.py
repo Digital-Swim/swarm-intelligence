@@ -2,6 +2,7 @@
 import numpy as np
 
 from entities import AgentGroup, House, Store
+from multi_warehouse import config
 
 
 class WareHouseEnvironment:
@@ -118,26 +119,7 @@ class WareHouseEnvironment:
         return np.array([
            group.best_position for group in self.groups
         ]).reshape(-1, self.dimension)
-            
-    @property
-    def group_leader_agent_indexes(self):
-
-        indexes = []
-        offset = 0
-
-        for group in self.groups:
-
-            if group.agents:
-                best_agent = max(
-                    range(len(group.agents)),
-                    key=lambda i: group.agents[i].score
-                )
-
-                indexes.append(offset + best_agent)
-
-            offset += len(group.agents)
-
-        return indexes
+   
 
     def get_swarm_agent_positions(self):
         return self.agent_positions
@@ -183,7 +165,15 @@ class WareHouseEnvironment:
                 axis=1
             )
 
-            score += np.min(distances)
+            min_distance = np.min(distances)
+            max_distance = np.max(distances)
+
+            score += min_distance
+
+            if max_distance > config.MAX_WAREHOUSE_DISTANCE:
+                score -= config.WAREHOUSE_DISTANCE_PENALTY * (
+                    max_distance - config.MAX_WAREHOUSE_DISTANCE
+                ) ** 2
 
         # Objective 3: Maximize distance from houses
         if self.no_of_houses > 0:
@@ -207,8 +197,29 @@ class WareHouseEnvironment:
 
             score -= penalty
 
+        # Objective to maintin distance between the boundary
+        score = score - self.calculate_boundary_penalty(position)
+        
         return float(score)
 
+    def calculate_boundary_penalty(self, position):
+        """
+        Penalize positions that are too close to the environment boundaries.
+        """
+        margin = 10
+        world_size = self.world_size
+        penalty_weight = 0.8
+
+        penalty = 0.0
+
+        for coordinate in position:
+            if coordinate < margin:
+                penalty += (margin - coordinate) ** 2
+
+            elif coordinate > world_size - margin:
+                penalty += (coordinate - (world_size - margin)) ** 2
+
+        return penalty * penalty_weight
 
     # Score for heatmap, 
     def get_score_at_position(self, position):

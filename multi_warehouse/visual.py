@@ -18,6 +18,12 @@ class MultiWarehouseVisualizer:
         # 1. Pre-initialize persistent fig and ax variables to keep memory usage low
         self.fig, self.ax = plt.subplots(figsize=(10, 10))
         
+        
+        manager = plt.get_current_fig_manager()
+        
+        if manager:
+            manager.full_screen_toggle()
+
         # 2. Cache the background score heatmap matrix so your computer doesn't 
         # re-calculate 10,000 spatial grids every single frame update.
         self.heatmap_data = self.get_heatmap_data()
