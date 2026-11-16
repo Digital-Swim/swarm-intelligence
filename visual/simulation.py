@@ -18,8 +18,8 @@ class Simulation:
             np.random.uniform(0, self.cfg.height, n),
         )).astype(np.float32)
         self.obstacles = np.column_stack((
-                    np.random.uniform(0, self.cfg.width, 21),
-                    np.random.uniform(0, self.cfg.height, 21),
+                    np.random.uniform(0, self.cfg.width, self.cfg.initial_obstacles),
+                    np.random.uniform(0, self.cfg.height, self.cfg.initial_obstacles),
                 )).astype(np.float32)
         angles = np.random.uniform(0, 2 * np.pi, n)
         speeds = np.random.uniform(

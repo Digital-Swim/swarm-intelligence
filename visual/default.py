@@ -5,6 +5,7 @@ class Configuration:
     width: int = 1100
     height: int = 750
     initial_particles: int = 50
+    initial_obstacles: int = 21
     fps_limit: int = 120
 
     # Visual settings
