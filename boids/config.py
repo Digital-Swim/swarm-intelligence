@@ -4,7 +4,7 @@ from dataclasses import dataclass
 class Config:
     width: int = 1100
     height: int = 750
-    initial_particles: int = 200
+    initial_particles: int = 50
     fps_limit: int = 120
 
     # Visual settings

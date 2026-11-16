@@ -1,5 +1,6 @@
 import numpy as np
 from  boids.behavior import update_velocities
+#from  boids.flock import update_velocities
 
 class Simulation:
     def __init__(self, config):
@@ -16,7 +17,10 @@ class Simulation:
             np.random.uniform(0, self.cfg.width, n),
             np.random.uniform(0, self.cfg.height, n),
         )).astype(np.float32)
-
+        self.obstacles = np.column_stack((
+                    np.random.uniform(0, self.cfg.width, 21),
+                    np.random.uniform(0, self.cfg.height, 21),
+                )).astype(np.float32)
         angles = np.random.uniform(0, 2 * np.pi, n)
         speeds = np.random.uniform(
             self.cfg.initial_speed_min,
@@ -57,6 +61,7 @@ class Simulation:
         self.velocities = update_velocities(
             positions=self.positions,
             velocities=self.velocities,
+            obstacles=self.obstacles,
             dt=dt,
             mouse_position=np.asarray(mouse_position, dtype=np.float32),
             mouse_mode=mouse_mode,  # 0 none, +1 attract, -1 repel

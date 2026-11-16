@@ -12,7 +12,7 @@ class Renderer:
     def clear(self):
         self.trails.fill((0, 0, 0, 0))
 
-    def draw(self, screen, positions, velocities):
+    def draw(self, screen, positions, velocities, obstacles):
         screen.fill(self.cfg.background)
 
         # Fade the previous frame instead of clearing it completely.
@@ -43,3 +43,18 @@ class Renderer:
                 )
 
         screen.blit(self.trails, (0, 0))
+        
+        if len(obstacles):
+            color = (255, 255, 255)
+            for o in obstacles:
+                # Supports obstacles as (x, y) or (x, y, radius)
+                ox, oy = o[0], o[1]
+                #radius = o[2] if len(o) > 2 else getattr(self.cfg, 'obstacle_radius', self.cfg.particle_radius * 2)
+                
+                pygame.draw.circle(
+                    screen,
+                    color,
+                    (int(ox), int(oy)),
+                    int(5),
+                )
+

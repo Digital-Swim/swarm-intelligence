@@ -49,7 +49,7 @@ def main():
                 mouse_mode=mouse_mode,
             )
 
-        renderer.draw(screen, sim.positions, sim.velocities)
+        renderer.draw(screen, sim.positions, sim.velocities,sim.obstacles)
 
         status = "PAUSED" if paused else "RUNNING"
         lines = [
