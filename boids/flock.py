@@ -189,7 +189,7 @@ _state = None
 
 
 def update_velocities(positions, velocities, obstacles, dt,
-                      mouse_position, mouse_mode, bounds):
+                      mouse_position, mouse_mode, bounds, targets=None):
     """Drop-in wrapper with the original signature (keeps a module-level Flock)."""
     global _state
     n = len(positions)

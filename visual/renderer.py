@@ -9,12 +9,30 @@ class Renderer:
             (config.width, config.height),
             flags=pygame.SRCALPHA,
         )
+        self.grid_surface = pygame.Surface(
+            (config.width, config.height),
+            flags=pygame.SRCALPHA,
+        )
 
     def clear(self):
         self.trails.fill((0, 0, 0, 0))
 
-    def draw(self, screen, positions, velocities, obstacles):
+    def draw(self, screen, positions, velocities, obstacles, targets=None, grid=None):
         screen.fill(self.cfg.background)
+
+        if grid is not None:
+            grid_width = min(grid.shape[0], self.cfg.width)
+            grid_height = min(grid.shape[1], self.cfg.height)
+            visible_grid = np.maximum(grid[:grid_width, :grid_height], 0)
+            
+            self.grid_surface.fill((255, 255, 255, 0))
+            alpha = pygame.surfarray.pixels_alpha(self.grid_surface)
+            alpha[:grid_width, :grid_height] = np.clip(
+                visible_grid * 255 / 50,
+                0,
+                255,
+            ).astype(np.uint8)
+            del alpha
 
         # Fade the previous frame instead of clearing it completely.
         fade = pygame.Surface(
@@ -45,6 +63,9 @@ class Renderer:
 
         screen.blit(self.trails, (0, 0))
         
+        if grid is not None:
+            screen.blit(self.grid_surface, (0, 0))
+        
         if len(obstacles):
             color = (255, 255, 255)
             for o in obstacles:
@@ -57,5 +78,14 @@ class Renderer:
                     color,
                     (int(ox), int(oy)),
                     int(5),
+                )
+
+        if targets is not None:
+            for target in targets:
+                pygame.draw.circle(
+                    screen,
+                    (0, 255, 0),
+                    (int(target[0]), int(target[1])),
+                    self.cfg.target_radius,
                 )
 

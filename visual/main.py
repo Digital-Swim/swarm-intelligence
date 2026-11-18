@@ -57,7 +57,14 @@ def run(behavior:SwarmBehavior, config:Configuration | None = None ):
                 mouse_mode=mouse_mode,
             )
 
-        renderer.draw(screen, sim.positions, sim.velocities,sim.obstacles)
+        renderer.draw(
+            screen,
+            sim.positions,
+            sim.velocities,
+            sim.obstacles,
+            targets=sim.targets,
+            grid=behavior.get_grid(), #type:ignore
+        )
 
         status = "PAUSED" if paused else "RUNNING"
         lines = [

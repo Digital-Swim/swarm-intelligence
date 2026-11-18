@@ -12,5 +12,6 @@ class SwarmBehavior(Protocol):
         mouse_position: NDArray[np.float32],
         mouse_mode: int,
         bounds: tuple[int, int],
+        targets: NDArray[np.float32] | None = None,
     ) -> NDArray[np.float32]:
         ...

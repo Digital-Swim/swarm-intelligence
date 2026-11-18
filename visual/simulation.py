@@ -11,21 +11,56 @@ class Simulation:
     def count(self):
         return len(self.positions)
 
-    def reset(self):
-        n = self.cfg.initial_particles
-        self.positions = np.column_stack((
-            np.random.uniform(0, self.cfg.width, n),
-            np.random.uniform(0, self.cfg.height, n),
+    def _create_initial_positions(self, count, spawn_bounds, fixed_positions):
+        if spawn_bounds is None:
+            x_bounds = (0, self.cfg.width)
+            y_bounds = (0, self.cfg.height)
+        else:
+            x_bounds, y_bounds = spawn_bounds
+
+        if x_bounds[0] > x_bounds[1] or y_bounds[0] > y_bounds[1]:
+            raise ValueError("Spawn bounds must be ordered from minimum to maximum.")
+
+        if fixed_positions is None:
+            fixed = np.empty((0, 2), dtype=np.float32)
+        else:
+            fixed = np.asarray(fixed_positions, dtype=np.float32)
+            if fixed.size == 0:
+                fixed = np.empty((0, 2), dtype=np.float32)
+            elif fixed.ndim != 2 or fixed.shape[1] != 2:
+                raise ValueError("Initial positions must contain (x, y) pairs.")
+
+        if len(fixed) > count:
+            raise ValueError("Initial positions cannot exceed the configured count.")
+
+        random_count = count - len(fixed)
+        random = np.column_stack((
+            np.random.uniform(x_bounds[0], x_bounds[1], random_count),
+            np.random.uniform(y_bounds[0], y_bounds[1], random_count),
         )).astype(np.float32)
-        self.obstacles = np.column_stack((
-                    np.random.uniform(0, self.cfg.width, self.cfg.initial_obstacles),
-                    np.random.uniform(0, self.cfg.height, self.cfg.initial_obstacles),
-                )).astype(np.float32)
-        angles = np.random.uniform(0, 2 * np.pi, n)
+        return np.concatenate((fixed, random))
+
+    def reset(self):
+        self.positions = self._create_initial_positions(
+            self.cfg.initial_particles,
+            self.cfg.particle_spawn_bounds,
+            self.cfg.initial_particle_positions,
+        )
+        self.obstacles = self._create_initial_positions(
+            self.cfg.initial_obstacles,
+            self.cfg.obstacle_spawn_bounds,
+            self.cfg.initial_obstacle_positions,
+        )
+        self.targets = self._create_initial_positions(
+            self.cfg.initial_targets,
+            self.cfg.target_spawn_bounds,
+            self.cfg.initial_target_positions,
+        )
+        angles = np.random.uniform(0, 2 * np.pi, self.cfg.initial_particles)
         speeds = np.random.uniform(
             self.cfg.initial_speed_min,
             self.cfg.initial_speed_max,
-            n,
+            self.cfg.initial_particles,
         )
         self.velocities = np.column_stack((
             np.cos(angles) * speeds,
@@ -62,6 +97,7 @@ class Simulation:
             positions=self.positions,
             velocities=self.velocities,
             obstacles=self.obstacles,
+            targets=self.targets,
             dt=dt,
             mouse_position=np.asarray(mouse_position, dtype=np.float32),
             mouse_mode=mouse_mode,  # 0 none, +1 attract, -1 repel

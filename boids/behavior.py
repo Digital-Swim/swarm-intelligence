@@ -32,6 +32,7 @@ def update_velocities(
     mouse_position,
     mouse_mode,
     bounds,
+    targets=None,
 ):
     N = len(positions)
     new_vel = velocities.copy()
